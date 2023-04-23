@@ -1,0 +1,95 @@
+/*Query1 - query used for first insight*/
+
+CREATE VIEW v1 AS
+SELECT g.Name,
+       count(i.CustomerId) AS genre_count
+FROM Genre g
+JOIN Track t ON g.GenreId = t.GenreId
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+JOIN Invoice i ON i.InvoiceId = il.InvoiceId
+GROUP BY 1
+
+**************************************************************
+
+SELECT v1.Name,
+       round(v1.genre_count *100.0 /
+               (SELECT sum(v1.genre_count)
+                FROM v1), 2) AS popularity
+FROM v1
+GROUP BY 1
+ORDER BY 2 DESC
+
+
+
+/*Query2 - query used for second insight*/
+
+CREATE VIEW v2 AS
+SELECT g.Name,
+       (il.UnitPrice*il.Quantity) * Count(il.TrackId) AS genre_total_earninigs
+FROM Genre g
+JOIN Track t ON g.GenreId = t.GenreId
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+GROUP BY 1
+ORDER BY 2 DESC
+
+**************************************************************
+
+SELECT v2.Name,
+       (round(v1.genre_count *100.0 /
+                (SELECT sum(v1.genre_count)
+                 FROM v1), 2)||'%') AS popularity,
+       (round(v2.genre_total_earninigs *100.0 /
+                (SELECT sum(v2.genre_total_earninigs)
+                 FROM v2), 2)||'%') AS earnings
+FROM v1
+JOIN v2 ON v1.Name = v2.Name
+GROUP BY 1
+ORDER BY 2 DESC
+
+
+
+
+/*Query3 - query used for third insight*/
+
+CREATE VIEW t1 AS
+SELECT a.Name,
+       count(DISTINCT i.CustomerId) AS artist_popularity
+FROM Artist a
+JOIN Album al ON a.ArtistId = al.ArtistId
+JOIN Track t ON t.AlbumId = al.AlbumId
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+JOIN Invoice i ON i.InvoiceId = il.InvoiceId
+GROUP BY 1
+ORDER BY 2 DESC
+
+**************************************************************
+
+SELECT *
+FROM t1
+LIMIT 5
+
+
+
+/*Query4 - query used for fourth insight*/
+
+CREATE VIEW t2 AS
+SELECT TrackId,
+       (UnitPrice*Quantity) * Count(TrackId) AS track_total_earninigs
+FROM InvoiceLine
+GROUP BY TrackId
+
+**************************************************************
+
+SELECT t1.Name,
+       t1.artist_popularity,
+       sum(t2.track_total_earninigs) AS artist_total_earnings
+FROM t1
+JOIN Artist a ON t1.Name = a.Name
+JOIN Album al ON a.ArtistId = al.ArtistId
+JOIN Track t ON t.AlbumId = al.AlbumId
+JOIN t2 ON t2.TrackId = t.TrackId
+GROUP BY 1
+HAVING t1.artist_popularity>
+  (SELECT avg(t1.artist_popularity)
+   FROM t1)
+ORDER BY 2 DESC
