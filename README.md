@@ -2,7 +2,7 @@
 SQL and data visualizaation Project to answer 4 questions in Chinook db and create preseentation
 
 ## Overview
-In the Project we will be using a new data set. It will be a music store. However, as one final preparation, below is a fully completed project that uses the Parch and Posey Data you have been using. Hopefully, it will be an example you can use to guide your work in the project.
+In this project, we will query the Chinook Database. The Chinook Database holds information about a music store. For this project, we will be assisting the Chinook team with understanding the media in their store, their customers and employees, and their invoice information. To assist you in the queries ahead, the schema for the Chinook Database is provided below. You can see the columns that link tables together via the arrows.
 
 ### Question 1 : What are the popularity percentages of different music genres?
 #### Findings 
